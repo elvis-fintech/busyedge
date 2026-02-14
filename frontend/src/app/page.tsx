@@ -1,47 +1,35 @@
 'use client'
 
 import { useState } from 'react'
+import { ThemeProvider } from '../components/ThemeProvider'
+import Sidebar from '../components/Sidebar'
 import MarketDashboard from '../components/MarketDashboard'
 import WhaleDashboard from '../components/WhaleDashboard'
 
 type Tab = 'market' | 'whale'
 
-export default function Home() {
+function DashboardContent() {
   const [activeTab, setActiveTab] = useState<Tab>('market')
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      {/* Tab Navigation */}
-      <div className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl px-6">
-          <nav className="-mb-px flex gap-8" aria-label="Tabs">
-            <button
-              onClick={() => setActiveTab('market')}
-              className={`border-b-2 px-1 py-4 text-sm font-medium transition-colors ${
-                activeTab === 'market'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
-              }`}
-            >
-              📊 Market
-            </button>
-            <button
-              onClick={() => setActiveTab('whale')}
-              className={`border-b-2 px-1 py-4 text-sm font-medium transition-colors ${
-                activeTab === 'whale'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
-              }`}
-            >
-              🐋 Whale
-            </button>
-          </nav>
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-900">
+      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      
+      {/* Main Content - with left padding for sidebar */}
+      <div className="lg:pl-64">
+        <div className="py-6 lg:py-8">
+          {activeTab === 'market' && <MarketDashboard />}
+          {activeTab === 'whale' && <WhaleDashboard />}
         </div>
       </div>
+    </div>
+  )
+}
 
-      {/* Content */}
-      {activeTab === 'market' && <MarketDashboard />}
-      {activeTab === 'whale' && <WhaleDashboard />}
-    </main>
+export default function Home() {
+  return (
+    <ThemeProvider>
+      <DashboardContent />
+    </ThemeProvider>
   )
 }

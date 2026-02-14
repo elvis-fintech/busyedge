@@ -65,9 +65,10 @@ export default function MarketDashboard() {
   const [fearGreed, setFearGreed] = useState<FearGreedIndex | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [refreshInterval, setRefreshInterval] = useState(60) // seconds
 
   const loadDashboard = useCallback(async () => {
-    setLoading(true)
     setError(null)
 
     try {
@@ -78,6 +79,7 @@ export default function MarketDashboard() {
       ])
       setDashboard(dashboardData)
       setFearGreed(fgData)
+      setLastUpdated(new Date())
     } catch (err) {
       setError(err instanceof Error ? err.message : '載入資料失敗')
     } finally {
@@ -89,12 +91,35 @@ export default function MarketDashboard() {
     void loadDashboard()
   }, [loadDashboard])
 
+  // Auto-refresh
+  useEffect(() => {
+    if (refreshInterval <= 0) return
+    
+    const interval = setInterval(() => {
+      void loadDashboard()
+    }, refreshInterval * 1000)
+    
+    return () => clearInterval(interval)
+  }, [refreshInterval, loadDashboard])
+
   if (loading && !dashboard) {
     return (
       <section className="mx-auto w-full max-w-7xl px-6 py-16">
-        <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-          <p className="text-lg font-semibold text-slate-700">載入市場資料中...</p>
+        {/* Skeleton for header */}
+        <div className="mb-8 h-10 w-64 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700" />
+        
+        {/* Skeleton for cards */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-24 animate-pulse rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800" />
+          ))}
         </div>
+        
+        {/* Skeleton for Fear & Greed */}
+        <div className="mt-8 h-40 animate-pulse rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800" />
+        
+        {/* Skeleton for table */}
+        <div className="mt-8 h-64 animate-pulse rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800" />
       </section>
     )
   }
@@ -102,8 +127,8 @@ export default function MarketDashboard() {
   if (error && !dashboard) {
     return (
       <section className="mx-auto w-full max-w-7xl px-6 py-16">
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-10 text-center shadow-sm">
-          <p className="font-semibold text-red-700">無法載入儀表板：{error}</p>
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-10 text-center shadow-sm dark:bg-red-900/20">
+          <p className="font-semibold text-red-700 dark:text-red-400">{error}</p>
           <button
             onClick={() => void loadDashboard()}
             className="mt-4 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
@@ -124,13 +149,62 @@ export default function MarketDashboard() {
   return (
     <section className="mx-auto w-full max-w-7xl space-y-8 px-6 py-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-slate-900">BusyEdge Market Dashboard</h1>
-        <button
-          onClick={() => void loadDashboard()}
-          className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          重新整理
-        </button>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">BusyEdge Market Dashboard</h1>
+        
+        <div className="flex items-center gap-3">
+          {/* Last Updated */}
+          {lastUpdated && (
+            <span className="text-sm text-slate-500 dark:text-slate-400">
+              更新: {lastUpdated.toLocaleTimeString()}
+            </span>
+          )}
+          
+          {/* Refresh Interval Selector */}
+          <select
+            value={refreshInterval}
+            onChange={(e) => setRefreshInterval(Number(e.target.value))}
+            className="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+          >
+            <option value={0}>手動</option>
+            <option value={30}>30秒</option>
+            <option value={60}>1分鐘</option>
+            <option value={300}>5分鐘</option>
+          </select>
+          
+          <button
+            onClick={() => void loadDashboard()}
+            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+          >
+            重新整理
+          </button>
+          
+          {/* Export CSV */}
+          <button
+            onClick={() => {
+              if (!dashboard) return
+              const csv = [
+                ['Symbol', 'Price', '24h Change %', 'Market Cap', 'Volume'].join(','),
+                ...dashboard.prices.map(p => [
+                  p.symbol.toUpperCase(),
+                  p.price_usd ?? '',
+                  p.change_24h_pct ?? '',
+                  p.market_cap ?? '',
+                  p.volume_24h ?? '',
+                ].join(','))
+              ].join('\n')
+              const blob = new Blob([csv], { type: 'text/csv' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `prices_${new Date().toISOString().split('T')[0]}.csv`
+              a.click()
+              URL.revokeObjectURL(url)
+            }}
+            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+          >
+            📥 Export
+          </button>
+        </div>
       </div>
 
       {error ? (
