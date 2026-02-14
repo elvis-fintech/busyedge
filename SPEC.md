@@ -36,9 +36,13 @@ AI-powered crypto trading intelligence platform providing market data, whale tra
 - [x] API endpoints
 - [x] WhaleDashboard UI
 
-### Phase 4: Sentiment Analysis ⏳
-- [ ] Twitter/Reddit monitoring
-- [ ] NLP sentiment scoring
+### Phase 4: Sentiment Analysis ✅ (Complete)
+- [x] Sentiment service (sentiment.py)
+- [x] API endpoints
+- [x] SentimentDashboard UI
+- [x] Overall market sentiment
+- [x] Coin-specific sentiment with selector
+- [x] Trending topics
 
 ### Phase 5: AI Signals ⏳
 - [ ] Multi-agent system
