@@ -4,13 +4,14 @@ import { useState } from 'react'
 import { useTheme } from './ThemeProvider'
 
 interface SidebarProps {
-  activeTab: 'market' | 'whale'
-  onTabChange: (tab: 'market' | 'whale') => void
+  activeTab: 'market' | 'whale' | 'sentiment'
+  onTabChange: (tab: 'market' | 'whale' | 'sentiment') => void
 }
 
 const navItems = [
   { id: 'market' as const, label: 'Market', icon: '📊' },
   { id: 'whale' as const, label: 'Whale', icon: '🐋' },
+  { id: 'sentiment' as const, label: 'Sentiment', icon: '💭' },
 ]
 
 export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {

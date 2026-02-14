@@ -5,8 +5,9 @@ import { ThemeProvider } from '../components/ThemeProvider'
 import Sidebar from '../components/Sidebar'
 import MarketDashboard from '../components/MarketDashboard'
 import WhaleDashboard from '../components/WhaleDashboard'
+import SentimentDashboard from '../components/SentimentDashboard'
 
-type Tab = 'market' | 'whale'
+type Tab = 'market' | 'whale' | 'sentiment'
 
 function DashboardContent() {
   const [activeTab, setActiveTab] = useState<Tab>('market')
@@ -20,6 +21,7 @@ function DashboardContent() {
         <div className="py-6 lg:py-8">
           {activeTab === 'market' && <MarketDashboard />}
           {activeTab === 'whale' && <WhaleDashboard />}
+          {activeTab === 'sentiment' && <SentimentDashboard />}
         </div>
       </div>
     </div>
