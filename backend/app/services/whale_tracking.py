@@ -1,6 +1,7 @@
 """Whale Tracking 服務 - On-chain 大額轉賬追蹤。"""
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
@@ -114,6 +115,9 @@ class WhaleTrackingService:
             "total_outflow_eth": round(total_outflow, 2),
             "net_flow_eth": round(total_inflow - total_outflow, 2),
             "exchange_flows": exchange_flows,
+            "data_source": "mock_onchain_data",
+            "is_mock": True,
+            "updated_at": datetime.now(UTC).isoformat(),
         }
 
     async def get_whale_wallets(self) -> list[dict[str, Any]]:

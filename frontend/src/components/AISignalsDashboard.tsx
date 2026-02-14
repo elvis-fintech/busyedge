@@ -1,12 +1,16 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { API_BASE_URL } from '../lib/config'
 
 interface SignalData {
   coin: string
   signal: 'BUY' | 'SELL' | 'HOLD'
   confidence: number
   reason: string
+  model_version?: string
+  data_source?: string
+  is_mock?: boolean
   generated_at: string
 }
 
@@ -58,8 +62,7 @@ export default function AISignalsDashboard() {
     setError(null)
 
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000/api'
-      const res = await fetch(`${API_BASE}/ai/signals`)
+      const res = await fetch(`${API_BASE_URL}/ai/signals`)
 
       if (!res.ok) {
         throw new Error('Failed to fetch AI signals')
@@ -77,8 +80,7 @@ export default function AISignalsDashboard() {
 
   const loadAnalysis = useCallback(async (coin: string) => {
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000/api'
-      const res = await fetch(`${API_BASE}/ai/analysis/${coin}`)
+      const res = await fetch(`${API_BASE_URL}/ai/signals/${coin}`)
 
       if (!res.ok) {
         throw new Error('Failed to fetch analysis')
@@ -155,6 +157,15 @@ export default function AISignalsDashboard() {
           更新失敗: {error}
         </p>
       )}
+
+      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-200">
+        <p>風險提示：AI 訊號僅供參考，並非投資建議。</p>
+        <p className="mt-1">
+          模型版本: {signals[0]?.model_version ?? 'unknown'} ·
+          資料來源: {signals[0]?.data_source ?? 'unknown'} ·
+          狀態: {signals[0]?.is_mock ? 'Mock Data' : 'Live Data'}
+        </p>
+      </div>
 
       {/* Signal Cards Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

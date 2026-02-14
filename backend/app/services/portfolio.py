@@ -63,6 +63,8 @@ class PortfolioService:
                 "total_pnl_usd": round(total_pnl, 2),
                 "total_pnl_pct": round(total_pnl_pct, 2),
             },
+            "data_source": "mock_positions",
+            "is_mock": True,
             "updated_at": datetime.now(UTC).isoformat(),
         }
 

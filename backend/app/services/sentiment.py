@@ -43,6 +43,8 @@ class SentimentService:
                 "article_count": 234,
                 "change_24h": 8.3,
             },
+            "data_source": "mock_sentiment",
+            "is_mock": True,
             "updated_at": datetime.now().isoformat(),
         }
 
@@ -92,6 +94,8 @@ class SentimentService:
                     {"title": f"Analysts predict ${coin} to reach new highs", "source": "CoinDesk"},
                 ]
             },
+            "data_source": "mock_sentiment",
+            "is_mock": True,
             "updated_at": datetime.now().isoformat(),
         }
 
