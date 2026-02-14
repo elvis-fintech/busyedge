@@ -39,6 +39,20 @@ export interface FundingRate {
   average_rate: number | null
 }
 
+export interface FearGreedIndex {
+  value: number
+  value_classification: string
+  timestamp: number
+  time_updated: string
+}
+
+export interface FearGreedHistoryItem {
+  value: number
+  value_classification: string
+  timestamp: number
+  date: string
+}
+
 export interface DashboardData {
   generated_at: string
   prices: MarketPrice[]
@@ -65,6 +79,18 @@ async function request<T>(path: string): Promise<T> {
 
 export async function fetchMarketDashboard(): Promise<DashboardData> {
   const payload = await request<{ data: DashboardData }>('/market/dashboard')
+  return payload.data
+}
+
+export async function fetchFearGreedIndex(): Promise<FearGreedIndex> {
+  const payload = await request<{ data: FearGreedIndex }>('/market/fear-greed')
+  return payload.data
+}
+
+export async function fetchFearGreedHistory(days: number = 30): Promise<FearGreedHistoryItem[]> {
+  const payload = await request<{ data: FearGreedHistoryItem[] }>(
+    `/market/fear-greed/history?days=${days}`
+  )
   return payload.data
 }
 

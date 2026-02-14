@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 
-import type { DashboardData, FundingSource } from '../lib/api'
-import { fetchMarketDashboard } from '../lib/api'
+import type { DashboardData, FearGreedIndex, FundingSource } from '../lib/api'
+import { fetchMarketDashboard, fetchFearGreedIndex } from '../lib/api'
 
 function formatCurrency(value: number | null, compact = false): string {
   if (value === null) {
@@ -44,8 +44,25 @@ function formatNextFundingTime(source: FundingSource | null): string {
   return parsed.toLocaleString()
 }
 
+function getFearGreedColor(value: number): string {
+  if (value <= 25) return 'bg-red-500' // Extreme Fear
+  if (value <= 45) return 'bg-orange-500' // Fear
+  if (value <= 55) return 'bg-yellow-500' // Neutral
+  if (value <= 75) return 'bg-lime-500' // Greed
+  return 'bg-green-500' // Extreme Greed
+}
+
+function getFearGreedLabel(value: number): string {
+  if (value <= 25) return 'Extreme Fear'
+  if (value <= 45) return 'Fear'
+  if (value <= 55) return 'Neutral'
+  if (value <= 75) return 'Greed'
+  return 'Extreme Greed'
+}
+
 export default function MarketDashboard() {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null)
+  const [fearGreed, setFearGreed] = useState<FearGreedIndex | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -55,8 +72,12 @@ export default function MarketDashboard() {
 
     try {
       // 集中處理 API 請求，避免畫面與資料狀態不同步
-      const data = await fetchMarketDashboard()
-      setDashboard(data)
+      const [dashboardData, fgData] = await Promise.all([
+        fetchMarketDashboard(),
+        fetchFearGreedIndex(),
+      ])
+      setDashboard(dashboardData)
+      setFearGreed(fgData)
     } catch (err) {
       setError(err instanceof Error ? err.message : '載入資料失敗')
     } finally {
@@ -117,6 +138,44 @@ export default function MarketDashboard() {
           更新資料時發生錯誤：{error}
         </p>
       ) : null}
+
+      {/* Fear & Greed Index */}
+      {fearGreed && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-slate-900">Fear & Greed Index</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                更新時間：{fearGreed.time_updated}
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-4xl font-bold text-slate-900">{fearGreed.value}</p>
+                <p className={`text-sm font-medium ${getFearGreedColor(fearGreed.value).replace('bg-', 'text-')}`}>
+                  {fearGreed.value_classification}
+                </p>
+              </div>
+              <div className={`h-16 w-16 rounded-full ${getFearGreedColor(fearGreed.value)} flex items-center justify-center`}>
+                <span className="text-2xl text-white">
+                  {fearGreed.value <= 50 ? '😰' : '😎'}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-slate-100">
+            <div
+              className={`h-full ${getFearGreedColor(fearGreed.value)} transition-all duration-500`}
+              style={{ width: `${fearGreed.value}%` }}
+            />
+          </div>
+          <div className="mt-2 flex justify-between text-xs text-slate-400">
+            <span>Extreme Fear</span>
+            <span>Neutral</span>
+            <span>Extreme Greed</span>
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">

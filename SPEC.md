@@ -32,11 +32,11 @@ AI-powered crypto trading intelligence platform providing market data, whale tra
 - [x] FastAPI backend services (market_data.py, funding.py)
 - [x] Market API endpoints (market.py)
 - [x] MarketDashboard UI component
-- [ ] CoinGecko API integration (backend done)
-- [ ] Fear & Greed Index API
+- [x] CoinGecko API integration (backend done)
+- [x] Fear & Greed Index API (backend + frontend)
 - [ ] Funding rates (backend done, need frontend)
-- [ ] Real-time price display (backend done)
-- [ ] Price charts
+- [x] Real-time price display (backend done)
+- [x] Price charts
 
 ### Phase 3: Whale Tracking ⏳
 - [ ] On-chain data (Etherscan)

@@ -8,6 +8,7 @@ from fastapi import APIRouter, Query
 
 from app.services.funding import funding_rate_service
 from app.services.market_data import coin_gecko_service
+from app.services.fear_greed import fear_greed_service
 
 router = APIRouter(prefix="/market", tags=["market"])
 
@@ -69,4 +70,20 @@ async def get_dashboard_data(
             "funding": funding,
         }
     }
+
+
+@router.get("/fear-greed")
+async def get_fear_greed_current():
+    """取得最新 Fear & Greed Index。"""
+    data = await fear_greed_service.get_current()
+    return {"data": data}
+
+
+@router.get("/fear-greed/history")
+async def get_fear_greed_history(
+    days: int = Query(default=30, ge=1, le=100, description="歷史天數")
+):
+    """取得 Fear & Greed 歷史數據。"""
+    history = await fear_greed_service.get_history(days)
+    return {"data": history}
 
