@@ -33,18 +33,8 @@ AI-powered crypto trading intelligence platform providing market data, whale tra
 
 ### Phase 3: Whale Tracking ✅ (Complete)
 - [x] Whale tracking service (whale_tracking.py)
-- [x] API endpoints (/whale/summary, /whale/transactions, /whale/exchange-flows, /whale/wallets)
-- [x] WhaleDashboard UI with tab navigation
-- [x] Summary cards (24h transactions, inflow/outflow, net flow)
-- [x] Exchange flow visualization
-- [x] Recent transactions table with color coding
-
-### Phase 4: Sentiment Analysis ⏳
-
-### Phase 3: Whale Tracking ⏳
-- [ ] On-chain data (Etherscan)
-- [ ] Large transfer alerts
-- [ ] Exchange flow tracking
+- [x] API endpoints
+- [x] WhaleDashboard UI
 
 ### Phase 4: Sentiment Analysis ⏳
 - [ ] Twitter/Reddit monitoring
