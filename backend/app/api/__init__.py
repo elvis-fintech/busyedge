@@ -2,9 +2,11 @@
 from fastapi import APIRouter
 
 from app.api.market import router as market_router
+from app.api.whale import router as whale_router
 
 router = APIRouter()
 router.include_router(market_router)
+router.include_router(whale_router)
 
 
 @router.get("/status")
