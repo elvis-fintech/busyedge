@@ -6,8 +6,9 @@ import Sidebar from '../components/Sidebar'
 import MarketDashboard from '../components/MarketDashboard'
 import WhaleDashboard from '../components/WhaleDashboard'
 import SentimentDashboard from '../components/SentimentDashboard'
+import AISignalsDashboard from '../components/AISignalsDashboard'
 
-type Tab = 'market' | 'whale' | 'sentiment'
+type Tab = 'market' | 'whale' | 'sentiment' | 'ai'
 
 function DashboardContent() {
   const [activeTab, setActiveTab] = useState<Tab>('market')
@@ -22,6 +23,7 @@ function DashboardContent() {
           {activeTab === 'market' && <MarketDashboard />}
           {activeTab === 'whale' && <WhaleDashboard />}
           {activeTab === 'sentiment' && <SentimentDashboard />}
+          {activeTab === 'ai' && <AISignalsDashboard />}
         </div>
       </div>
     </div>
