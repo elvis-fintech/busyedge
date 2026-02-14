@@ -34,7 +34,7 @@ AI-powered crypto trading intelligence platform providing market data, whale tra
 - [x] MarketDashboard UI component
 - [x] CoinGecko API integration (backend done)
 - [x] Fear & Greed Index API (backend + frontend)
-- [ ] Funding rates (backend done, need frontend)
+- [x] Funding rates (backend + frontend done)
 - [x] Real-time price display (backend done)
 - [x] Price charts
 
