@@ -44,9 +44,14 @@ AI-powered crypto trading intelligence platform providing market data, whale tra
 - [x] Coin-specific sentiment with selector
 - [x] Trending topics
 
-### Phase 5: AI Signals ⏳
-- [ ] Multi-agent system
-- [ ] OpenAI integration
+### Phase 5: AI Signals ✅ (Complete)
+- [x] AI signals service (ai_signals.py)
+- [x] Multi-agent architecture (market + sentiment + signal generator)
+- [x] API endpoints (/ai/signals, /ai/signals/{coin}, /ai/analysis/{coin})
+- [x] AISignalsDashboard UI
+- [x] Signal cards with BUY/SELL/HOLD badges
+- [x] Confidence scores
+- [x] Detailed analysis modal
 
 ### Phase 6: Portfolio Tracker ⏳
 - [ ] Position management
