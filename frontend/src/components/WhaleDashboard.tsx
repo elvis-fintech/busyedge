@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { API_BASE_URL } from '../lib/config'
 
 interface WhaleSummary {
   whale_transactions_24h: number
@@ -69,11 +70,9 @@ export default function WhaleDashboard() {
     setError(null)
 
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000/api'
-
       const [summaryRes, txRes] = await Promise.all([
-        fetch(`${API_BASE}/whale/summary`),
-        fetch(`${API_BASE}/whale/transactions?min_value_usd=10000`),
+        fetch(`${API_BASE_URL}/whale/summary`),
+        fetch(`${API_BASE_URL}/whale/transactions?min_value_usd=10000`),
       ])
 
       if (!summaryRes.ok || !txRes.ok) {
@@ -187,7 +186,7 @@ export default function WhaleDashboard() {
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <p className="text-sm text-slate-500">24h 大額轉賬</p>
           <p className="mt-2 text-2xl font-bold text-slate-900">{summary.whale_transactions_24h}</p>
-          <p className="text-xs text-slate-400">{summary.large_transactions_100k} 筆 >$100k</p>
+          <p className="text-xs text-slate-400">{summary.large_transactions_100k} 筆 &gt;$100k</p>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <p className="text-sm text-slate-500">總流入 (24h)</p>

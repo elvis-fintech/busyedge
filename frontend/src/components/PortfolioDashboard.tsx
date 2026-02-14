@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { API_BASE_URL } from '../lib/config'
 
 interface PortfolioPosition {
   coin: string
@@ -51,8 +52,7 @@ export default function PortfolioDashboard() {
     setError(null)
 
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000/api'
-      const res = await fetch(`${API_BASE}/portfolio`, { cache: 'no-store' })
+      const res = await fetch(`${API_BASE_URL}/portfolio`, { cache: 'no-store' })
 
       if (!res.ok) {
         throw new Error(`Failed to fetch portfolio: ${res.status}`)

@@ -53,3 +53,10 @@ docker-compose up --build
 - Frontend: http://localhost:3000
 - Backend: http://localhost:8000
 - API Docs: http://localhost:8000/docs
+
+## Environment Notes
+
+- Frontend API base URL: `NEXT_PUBLIC_API_BASE_URL` (example: `http://localhost:8000/api`)
+- Optional Telegram alerts:
+  - `TELEGRAM_BOT_TOKEN`
+  - `TELEGRAM_CHAT_ID`

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { API_BASE_URL } from '../lib/config'
 
 interface SentimentData {
   overall_score: number
@@ -85,12 +86,10 @@ export default function SentimentDashboard() {
     setError(null)
 
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000/api'
-
       const [sentimentRes, coinRes, trendingRes] = await Promise.all([
-        fetch(`${API_BASE}/sentiment/overall`),
-        fetch(`${API_BASE}/sentiment/coin?coin=${selectedCoin}`),
-        fetch(`${API_BASE}/sentiment/trending`),
+        fetch(`${API_BASE_URL}/sentiment/overall`),
+        fetch(`${API_BASE_URL}/sentiment/coin?coin=${selectedCoin}`),
+        fetch(`${API_BASE_URL}/sentiment/trending`),
       ])
 
       if (!sentimentRes.ok || !coinRes.ok || !trendingRes.ok) {

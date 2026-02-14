@@ -1,3 +1,5 @@
+import { API_BASE_URL } from './config'
+
 export interface MarketPrice {
   id: string
   symbol: string
@@ -62,8 +64,6 @@ export interface DashboardData {
   }
   funding: FundingRate[]
 }
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000/api'
 
 async function request<T>(path: string): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {

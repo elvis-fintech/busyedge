@@ -6,6 +6,7 @@ from app.api.whale import router as whale_router
 from app.api.sentiment import router as sentiment_router
 from app.api.ai_signals import router as ai_signals_router
 from app.api.portfolio import router as portfolio_router
+from app.api.alerts import router as alerts_router
 
 router = APIRouter()
 router.include_router(market_router)
@@ -13,6 +14,7 @@ router.include_router(whale_router)
 router.include_router(sentiment_router)
 router.include_router(ai_signals_router)
 router.include_router(portfolio_router)
+router.include_router(alerts_router)
 
 
 @router.get("/status")
