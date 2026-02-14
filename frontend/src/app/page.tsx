@@ -7,8 +7,9 @@ import MarketDashboard from '../components/MarketDashboard'
 import WhaleDashboard from '../components/WhaleDashboard'
 import SentimentDashboard from '../components/SentimentDashboard'
 import AISignalsDashboard from '../components/AISignalsDashboard'
+import PortfolioDashboard from '../components/PortfolioDashboard'
 
-type Tab = 'market' | 'whale' | 'sentiment' | 'ai'
+type Tab = 'market' | 'whale' | 'sentiment' | 'ai' | 'portfolio'
 
 function DashboardContent() {
   const [activeTab, setActiveTab] = useState<Tab>('market')
@@ -24,6 +25,7 @@ function DashboardContent() {
           {activeTab === 'whale' && <WhaleDashboard />}
           {activeTab === 'sentiment' && <SentimentDashboard />}
           {activeTab === 'ai' && <AISignalsDashboard />}
+          {activeTab === 'portfolio' && <PortfolioDashboard />}
         </div>
       </div>
     </div>
