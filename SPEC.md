@@ -28,11 +28,14 @@ AI-powered crypto trading intelligence platform providing market data, whale tra
 - [x] Project structure created
 - [x] Docker Compose setup
 
-### Phase 2: Market Data ⏳ (Next)
-- [ ] CoinGecko API integration
+### Phase 2: Market Data 🔄 (In Progress)
+- [x] FastAPI backend services (market_data.py, funding.py)
+- [x] Market API endpoints (market.py)
+- [x] MarketDashboard UI component
+- [ ] CoinGecko API integration (backend done)
 - [ ] Fear & Greed Index API
-- [ ] Funding rates (Binance/Bybit)
-- [ ] Real-time price display
+- [ ] Funding rates (backend done, need frontend)
+- [ ] Real-time price display (backend done)
 - [ ] Price charts
 
 ### Phase 3: Whale Tracking ⏳
@@ -59,7 +62,7 @@ AI-powered crypto trading intelligence platform providing market data, whale tra
 ## Milestones
 1. ✅ Repo created (Feb 14)
 2. ✅ Phase 1: Core Infra (Feb 14)
-3. ⏳ Phase 2: Market Data
+3. 🔄 Phase 2: Market Data (In Progress)
 4. ⏳ Phase 3: Whale Tracking
 5. ⏳ Phase 4: Sentiment
 6. ⏳ Phase 5: AI Signals
