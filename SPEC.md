@@ -53,9 +53,11 @@ AI-powered crypto trading intelligence platform providing market data, whale tra
 - [x] Confidence scores
 - [x] Detailed analysis modal
 
-### Phase 6: Portfolio Tracker ⏳
-- [ ] Position management
-- [ ] P&L calculation
+### Phase 6: Portfolio Tracker ✅ (Complete)
+- [x] Portfolio service (portfolio.py) with mock positions
+- [x] API endpoints (/portfolio, /portfolio/{coin})
+- [x] PortfolioDashboard UI
+- [x] Positions table and P&L summary
 
 ### Phase 7: Alerts ⏳
 - [ ] Price alerts
@@ -64,11 +66,13 @@ AI-powered crypto trading intelligence platform providing market data, whale tra
 ## Milestones
 1. ✅ Repo created (Feb 14)
 2. ✅ Phase 1: Core Infra (Feb 14)
-3. 🔄 Phase 2: Market Data (In Progress)
-4. ⏳ Phase 3: Whale Tracking
-5. ⏳ Phase 4: Sentiment
-6. ⏳ Phase 5: AI Signals
-7. ⏳ Launch
+3. ✅ Phase 2: Market Data
+4. ✅ Phase 3: Whale Tracking
+5. ✅ Phase 4: Sentiment
+6. ✅ Phase 5: AI Signals
+7. ✅ Phase 6: Portfolio Tracker
+8. ⏳ Phase 7: Alerts
+9. ⏳ Launch
 
 ---
 Last Updated: 2026-02-14
