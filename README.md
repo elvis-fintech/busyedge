@@ -1,30 +1,26 @@
 # BusyEdge
 
-Edge Computing Platform
+BusyEdge 係一個加密市場監控平台，提供市場總覽、巨鯨追蹤、情緒分析、AI 訊號、投資組合同價格提醒。
 
-## Project Structure
+## 功能重點
 
-```
+- **真實資料來源**：CoinGecko、Alternative.me、Blockchair、交易所 funding API。
+- **降級策略**：上游失敗時優先回快取資料（`is_stale=true`），唔會 fabricate 假數值。
+- **多語言與主題**：支援繁中/英文切換、Light/Dark mode。
+
+## 專案結構
+
+```text
 busyedge/
-├── frontend/           # Next.js 14 (App Router)
-│   ├── src/
-│   │   ├── app/       # App router pages
-│   │   ├── components/ # React components
-│   │   └── lib/       # Utilities
-│   ├── package.json
-│   └── tailwind.config.js
-├── backend/           # FastAPI
-│   ├── app/
-│   │   ├── api/       # API routes
-│   │   ├── models/    # Pydantic models
-│   │   └── services/  # Business logic
-│   ├── requirements.txt
-│   └── main.py
-├── docker-compose.yml
-└── .env.example
+├─ frontend/                  # Next.js 14 + Tailwind
+│  └─ src/components/         # 各 dashboard UI
+├─ backend/                   # FastAPI
+│  └─ app/services/           # 市場、情緒、AI、巨鯨等服務
+├─ docker-compose.yml
+└─ .env.example
 ```
 
-## Quick Start
+## 本機開發
 
 ### Frontend
 
@@ -42,49 +38,42 @@ pip install -r requirements.txt
 python main.py
 ```
 
-### Docker
+## Docker 啟動
 
 ```powershell
 Copy-Item .env.example .env
-docker compose up --build -d
-```
-
-#### Docker 常用指令
-
-```powershell
-# 查看服務狀態
+docker compose up -d --build
 docker compose ps
-
-# 查看即時日誌
-docker compose logs -f backend
-docker compose logs -f frontend
-
-# 停止與移除容器
-docker compose down
 ```
 
-#### Docker 疑難排解
+- Frontend: `http://localhost:3000`
+- Backend API: `http://localhost:8000/api`
+- Swagger: `http://localhost:8000/docs`
 
-- 如果出現 `bind: ... 0.0.0.0:3000`，表示本機 3000 端口被佔用。
-- 可改 `docker-compose.yml` 的 frontend ports：
-  - 由 `"3000:3000"` 改為 `"3001:3000"`，然後用 `http://localhost:3001` 存取前端。
+## 必要/建議環境變數
 
-## Development
+- `NEXT_PUBLIC_API_BASE_URL`：例如 `http://localhost:8000/api`
+- `PORTFOLIO_POSITIONS_JSON`（建議）：
 
-- Frontend: http://localhost:3000
-- Backend: http://localhost:8000
-- API Docs: http://localhost:8000/docs
+```json
+[{"symbol":"BTC","quantity":0.5,"avg_cost_usd":52000},{"symbol":"ETH","quantity":3,"avg_cost_usd":2100}]
+```
 
-## Environment Notes
+> 未設定 `PORTFOLIO_POSITIONS_JSON` 時，Portfolio API 會回 `503`（刻意避免假資料）。
 
-- Frontend API base URL: `NEXT_PUBLIC_API_BASE_URL` (example: `http://localhost:8000/api`)
-- Optional Telegram alerts:
+- Telegram 提醒（可選）：
   - `TELEGRAM_BOT_TOKEN`
   - `TELEGRAM_CHAT_ID`
 
-## Docker Files
+## 驗證指令
 
-- `frontend/Dockerfile`: Next.js 生產版 build + start。
-- `frontend/.dockerignore`: 排除 `node_modules`、`.next`。
-- `backend/Dockerfile`: FastAPI + Uvicorn 服務。
-- `backend/.dockerignore`: 排除 Python cache 與虛擬環境。
+```bash
+# 前端
+cd frontend
+npm run lint
+npm run build
+
+# 後端
+cd ../backend
+python -m compileall .
+```
