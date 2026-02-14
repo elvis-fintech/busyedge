@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useTheme } from './ThemeProvider'
+import { useLocale } from './LocaleProvider'
 
 interface SidebarProps {
   activeTab: 'market' | 'whale' | 'sentiment' | 'ai' | 'portfolio' | 'alerts'
@@ -9,17 +10,19 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { id: 'market' as const, label: 'Market', icon: '📊' },
-  { id: 'whale' as const, label: 'Whale', icon: '🐋' },
-  { id: 'sentiment' as const, label: 'Sentiment', icon: '💭' },
-  { id: 'ai' as const, label: 'AI Signals', icon: '🤖' },
-  { id: 'portfolio' as const, label: 'Portfolio', icon: '💼' },
-  { id: 'alerts' as const, label: 'Alerts', icon: '🔔' },
+  { id: 'market' as const, zh: '市場', en: 'Market', icon: '📊' },
+  { id: 'whale' as const, zh: '巨鯨追蹤', en: 'Whale', icon: '🐋' },
+  { id: 'sentiment' as const, zh: '市場情緒', en: 'Sentiment', icon: '💭' },
+  { id: 'ai' as const, zh: 'AI 訊號', en: 'AI Signals', icon: '🤖' },
+  { id: 'portfolio' as const, zh: '投資組合', en: 'Portfolio', icon: '💼' },
+  { id: 'alerts' as const, zh: '價格提醒', en: 'Alerts', icon: '🔔' },
 ]
 
 export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false)
+  const { locale } = useLocale()
+  const t = (zh: string, en: string) => (locale === 'en' ? en : zh)
 
   return (
     <>
@@ -27,7 +30,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       <button
         onClick={() => setIsMobileOpen(!isMobileOpen)}
         className="fixed left-4 top-4 z-50 rounded-lg bg-white p-2 shadow-md dark:bg-slate-800 lg:hidden"
-        aria-label="Toggle menu"
+        aria-label={t('切換選單', 'Toggle menu')}
       >
         <svg className="h-6 w-6 text-slate-600 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           {isMobileOpen ? (
@@ -53,7 +56,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             <button
               onClick={() => setIsDesktopCollapsed(!isDesktopCollapsed)}
               className="hidden rounded-lg p-1 hover:bg-slate-100 dark:hover:bg-slate-800 lg:block"
-              aria-label="Collapse sidebar"
+              aria-label={t('收合側邊欄', 'Collapse sidebar')}
             >
               <svg className={`h-5 w-5 text-slate-500 transition-transform ${isDesktopCollapsed ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
@@ -77,13 +80,13 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
                 }`}
               >
                 <span className="text-xl">{item.icon}</span>
-                <span className={`font-medium ${isDesktopCollapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
+                <span className={`font-medium ${isDesktopCollapsed ? 'lg:hidden' : ''}`}>{t(item.zh, item.en)}</span>
               </button>
             ))}
           </nav>
 
-          {/* Theme Toggle */}
-          <div className="border-t border-slate-200 p-2 dark:border-slate-700">
+          <div className="space-y-1 border-t border-slate-200 p-2 dark:border-slate-700">
+            <LocaleToggle isDesktopCollapsed={isDesktopCollapsed} />
             <ThemeToggle isDesktopCollapsed={isDesktopCollapsed} />
           </div>
         </div>
@@ -102,6 +105,8 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
 
 function ThemeToggle({ isDesktopCollapsed }: { isDesktopCollapsed: boolean }) {
   const { theme, toggleTheme } = useTheme()
+  const { locale } = useLocale()
+  const t = (zh: string, en: string) => (locale === 'en' ? en : zh)
 
   return (
     <button
@@ -109,7 +114,7 @@ function ThemeToggle({ isDesktopCollapsed }: { isDesktopCollapsed: boolean }) {
       className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 ${
         isDesktopCollapsed ? 'lg:justify-center' : ''
       }`}
-      aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+      aria-label={theme === 'light' ? t('切換為深色模式', 'Switch to dark mode') : t('切換為淺色模式', 'Switch to light mode')}
     >
       {theme === 'light' ? (
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -121,7 +126,26 @@ function ThemeToggle({ isDesktopCollapsed }: { isDesktopCollapsed: boolean }) {
         </svg>
       )}
       <span className={`font-medium ${isDesktopCollapsed ? 'lg:hidden' : ''}`}>
-        {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+        {theme === 'light' ? t('深色模式', 'Dark Mode') : t('淺色模式', 'Light Mode')}
+      </span>
+    </button>
+  )
+}
+
+function LocaleToggle({ isDesktopCollapsed }: { isDesktopCollapsed: boolean }) {
+  const { locale, toggleLocale } = useLocale()
+
+  return (
+    <button
+      onClick={toggleLocale}
+      className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 ${
+        isDesktopCollapsed ? 'lg:justify-center' : ''
+      }`}
+      aria-label={locale === 'en' ? 'Switch to Chinese' : '切換至英文'}
+    >
+      <span className="text-base">🌐</span>
+      <span className={`font-medium ${isDesktopCollapsed ? 'lg:hidden' : ''}`}>
+        {locale === 'en' ? 'English' : '繁中'}
       </span>
     </button>
   )

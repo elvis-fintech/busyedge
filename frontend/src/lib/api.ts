@@ -46,6 +46,9 @@ export interface FearGreedIndex {
   value_classification: string
   timestamp: number
   time_updated: string
+  is_stale?: boolean
+  data_source?: string
+  fallback_reason?: string
 }
 
 export interface FearGreedHistoryItem {
@@ -63,6 +66,9 @@ export interface DashboardData {
     trending: TrendingCoin[]
   }
   funding: FundingRate[]
+  is_stale?: boolean
+  data_source?: string
+  stale_reasons?: string[]
 }
 
 async function request<T>(path: string): Promise<T> {
@@ -71,7 +77,16 @@ async function request<T>(path: string): Promise<T> {
   })
 
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`)
+    let detail = ''
+    try {
+      const payload = (await response.json()) as { detail?: string }
+      if (payload?.detail) {
+        detail = ` - ${payload.detail}`
+      }
+    } catch {
+      detail = ''
+    }
+    throw new Error(`API request failed: ${response.status}${detail}`)
   }
 
   return (await response.json()) as T

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ThemeProvider } from '../components/ThemeProvider'
+import { LocaleProvider } from '../components/LocaleProvider'
 import Sidebar from '../components/Sidebar'
 import MarketDashboard from '../components/MarketDashboard'
 import WhaleDashboard from '../components/WhaleDashboard'
@@ -37,7 +38,9 @@ function DashboardContent() {
 export default function Home() {
   return (
     <ThemeProvider>
-      <DashboardContent />
+      <LocaleProvider>
+        <DashboardContent />
+      </LocaleProvider>
     </ThemeProvider>
   )
 }
