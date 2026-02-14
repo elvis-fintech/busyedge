@@ -5,6 +5,8 @@ import asyncio
 from datetime import UTC, datetime
 from typing import Any
 
+from fastapi import HTTPException
+
 from app.services.fear_greed import fear_greed_service
 from app.services.funding import funding_rate_service
 from app.services.market_data import coin_gecko_service
@@ -23,17 +25,6 @@ class AISignalsService:
         "ADA": {"id": "cardano", "pair": "ADAUSDT"},
         "AVAX": {"id": "avalanche-2", "pair": "AVAXUSDT"},
     }
-    BASELINE_PRICE_BY_SYMBOL: dict[str, float] = {
-        "BTC": 60000.0,
-        "ETH": 3000.0,
-        "SOL": 120.0,
-        "XRP": 0.6,
-        "DOGE": 0.12,
-        "BNB": 600.0,
-        "ADA": 0.7,
-        "AVAX": 35.0,
-    }
-
     MODEL_VERSION = "rule-based-live-v2"
 
     @staticmethod
@@ -108,7 +99,7 @@ class AISignalsService:
 
         market_task = coin_gecko_service.get_simple_prices(coin_ids)
         funding_task = funding_rate_service.get_merged_funding_rates(pairs)
-        fear_task = fear_greed_service.get_current()
+        fear_task = fear_greed_service.get_current_safe()
 
         market_result, funding_result, fear_result = await asyncio.gather(
             market_task,
@@ -118,12 +109,23 @@ class AISignalsService:
         )
 
         source_parts: list[str] = []
-        is_mock = False
+        is_stale = False
 
         market_by_id: dict[str, dict[str, Any]] = {}
         if isinstance(market_result, Exception):
-            is_mock = True
-            source_parts.append("coingecko_fallback")
+            cached_prices = coin_gecko_service.get_cached_simple_prices(coin_ids)
+            if not cached_prices:
+                # 若完整集合無快取，退而使用任一可用快取，允許部分幣種產生訊號。
+                cached_prices = coin_gecko_service.get_cached_simple_prices()
+            if not cached_prices:
+                raise HTTPException(status_code=502, detail="AI Signals 無法取得價格資料")
+            source_parts.append("coingecko_cache")
+            is_stale = True
+            market_by_id = {
+                str(item.get("id", "")): item
+                for item in cached_prices
+                if item.get("id")
+            }
         else:
             source_parts.append("coingecko")
             market_by_id = {
@@ -146,12 +148,19 @@ class AISignalsService:
         fear_value = 50
         fear_label = "Neutral"
         if isinstance(fear_result, Exception):
-            is_mock = True
-            source_parts.append("fear_greed_fallback")
+            cached_fear = fear_greed_service.get_cached_current()
+            if not cached_fear:
+                raise HTTPException(status_code=502, detail="AI Signals 無法取得 Fear & Greed 資料")
+            source_parts.append("fear_greed_cache")
+            fear_value = int(cached_fear.get("value", 50))
+            fear_label = str(cached_fear.get("value_classification") or self._classify_fear_greed(fear_value))
+            is_stale = True
         else:
             source_parts.append("fear_greed")
             fear_value = int(fear_result.get("value", 50))
             fear_label = str(fear_result.get("value_classification") or self._classify_fear_greed(fear_value))
+            if bool(fear_result.get("is_stale")):
+                is_stale = True
 
         return {
             "symbols": symbols,
@@ -159,7 +168,7 @@ class AISignalsService:
             "funding_by_pair": funding_by_pair,
             "fear_value": fear_value,
             "fear_label": fear_label,
-            "is_mock": is_mock,
+            "is_stale": is_stale,
             "data_source": "+".join(source_parts),
         }
 
@@ -174,14 +183,15 @@ class AISignalsService:
 
         market_row = context["market_by_id"].get(coin_id)
         if market_row is None:
-            context["is_mock"] = True
-            current_price = self.BASELINE_PRICE_BY_SYMBOL.get(symbol, 1.0)
-            change_24h_pct = 0.0
-            volume_24h = 0.0
-        else:
-            current_price = float(market_row.get("price_usd") or self.BASELINE_PRICE_BY_SYMBOL.get(symbol, 1.0))
-            change_24h_pct = float(market_row.get("change_24h_pct") or 0.0)
-            volume_24h = float(market_row.get("volume_24h") or 0.0)
+            raise ValueError(f"缺少 {symbol} 行情資料，無法產生真實 AI 訊號")
+
+        price_usd = market_row.get("price_usd")
+        if price_usd is None:
+            raise ValueError(f"{symbol} 行情缺少 price_usd")
+
+        current_price = float(price_usd)
+        change_24h_pct = float(market_row.get("change_24h_pct") or 0.0)
+        volume_24h = float(market_row.get("volume_24h") or 0.0)
 
         funding_row = context["funding_by_pair"].get(pair)
         avg_funding_rate = (
@@ -244,7 +254,8 @@ class AISignalsService:
             "reason": reason,
             "model_version": self.MODEL_VERSION,
             "data_source": context["data_source"],
-            "is_mock": bool(context["is_mock"]),
+            "is_mock": False,
+            "is_stale": bool(context["is_stale"]),
             "analysis": {
                 "market_analysis": {
                     "trend": self._trend_by_change(change_24h_pct),
@@ -279,7 +290,14 @@ class AISignalsService:
     async def get_all_signals(self) -> list[dict[str, Any]]:
         """取得所有幣種的交易信號。"""
         context = await self._collect_market_context()
-        signals = [self._build_signal_payload(symbol, context) for symbol in context["symbols"]]
+        signals: list[dict[str, Any]] = []
+        for symbol in context["symbols"]:
+            try:
+                signals.append(self._build_signal_payload(symbol, context))
+            except ValueError:
+                continue
+        if not signals:
+            raise HTTPException(status_code=502, detail="無可用即時行情，無法產生 AI 訊號")
         return sorted(signals, key=lambda item: item["confidence"], reverse=True)
 
     async def get_signal(self, coin: str) -> dict[str, Any]:
@@ -293,7 +311,8 @@ class AISignalsService:
                 "reason": "未支援幣種，無法產生有效訊號",
                 "model_version": self.MODEL_VERSION,
                 "data_source": "unsupported_symbol",
-                "is_mock": True,
+                "is_mock": False,
+                "is_stale": False,
                 "analysis": {
                     "market_analysis": {
                         "trend": "sideways",
@@ -307,7 +326,10 @@ class AISignalsService:
             }
 
         context = await self._collect_market_context()
-        return self._build_signal_payload(symbol, context)
+        try:
+            return self._build_signal_payload(symbol, context)
+        except ValueError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
 
     async def get_analysis(self, coin: str) -> dict[str, Any]:
         """取得特定幣種的詳細 AI 分析。"""
@@ -352,7 +374,9 @@ class AISignalsService:
         market = signal_payload["analysis"]["market_analysis"]
         risk = signal_payload["analysis"]["risk_assessment"]
 
-        current_price = float(market.get("price_usd") or self.BASELINE_PRICE_BY_SYMBOL.get(signal_payload["coin"], 1.0))
+        current_price = float(market.get("price_usd") or 0.0)
+        if current_price <= 0:
+            raise HTTPException(status_code=502, detail=f"{signal_payload['coin']} 缺少有效即時價格")
         signal = signal_payload["signal"]
 
         if signal == "BUY":
@@ -417,6 +441,7 @@ class AISignalsService:
             "model_version": signal_payload["model_version"],
             "data_source": signal_payload["data_source"],
             "is_mock": signal_payload["is_mock"],
+            "is_stale": signal_payload.get("is_stale", False),
             "detailed_analysis": {
                 "technical": {
                     "trend": trend_text,
